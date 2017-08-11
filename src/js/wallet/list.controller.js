@@ -67,14 +67,25 @@
         }
 
         function withdraw (wallet) {
-            sendCommandEvent(events.WALLET_WITHDRAW, wallet.balance.currency);
+            var id = wallet.balance.currency.id,
+                type;
+
+            if (id === Currency.BTC.id || id === Currency.ETH.id || id === Currency.WAVES.id) {
+                type = 'crypto';
+            } else if (id === Currency.EUR.id || id === Currency.USD.id) {
+                type = 'fiat';
+            } else {
+                throw new Error('Add an option here!');
+            }
+
+            sendCommandEvent(events.WALLET_WITHDRAW + type, wallet.balance.currency);
         }
 
         function deposit (wallet) {
             if (wallet.balance.currency === Currency.WAVES) {
                 depositFromCard(wallet.balance.currency);
             } else {
-                $scope.$broadcast(events.WALLET_DEPOSIT, {
+                $scope.$broadcast(events.WALLET_DEPOSIT + wallet.balance.currency.id, {
                     assetBalance: wallet.balance,
                     depositWith: wallet.depositWith
                 });

@@ -239,11 +239,19 @@
       <img src="img/topleftlogo.svg" />
       <p ng-class='{testnet: isTestnet()}'>{{::home.title}} <span class="wlcversion">{{::home.version}}</span></p>
     </div>
-    <span id="version" class="centerIt">Address:
+    <span id="version" class="centerIt">
+                <span>Address:</span>
                 <span id="wavesAccountAddress" class="clipSpan" tooltipster tooltip-theme="tooltipster-theme3" title="Copy the address to clipboard." ngclipboard data-clipboard-text="{{::menu.address}}" ngclipboard-success="clipboardOk()">{{::menu.address}}</span>
+                <span id="wavesAccountAddressQr" ng-click="menu.showAddressQr()">QR</span>
                 <span class="divider-2"></span>
                 <span class="inlineParagraph">Block:</span> <span id="blockheight">{{menu.blockHeight}}</span>
             </span>
+
+    <div class="noDisp">
+      <div id="address-qr-modal" waves-dialog global="true" no-support-link="true" cancel-button-visible="false" ok-button-caption="CLOSE">
+        <waves-qr-code size="300" value="::menu.addressQr"></waves-qr-code>
+      </div>
+    </div>
 
     <div id="header-Iconset">
       <a ng-click="menu.showBackupDialog()">
@@ -268,11 +276,21 @@
       <a ng-click="home.featureUnderDevelopment()">
         <img class="header-Icon fade" tooltipster tooltip-theme="tooltipster-theme2" src="img/uiTB-iconset-preferences.svg" alt="Preferences" title="Preferences"/>
       </a>
-      <a ng-click="home.featureUnderDevelopment()">
+      <a ng-click="menu.showProfileDialog()">
         <img class="header-Icon fade" tooltipster tooltip-theme="tooltipster-theme2" src="img/uiTB-iconset-profile.svg" alt="User profile" title="User profile"/>
       </a>
       <div class="noDisp" ng-controller="createAliasController as create">
         <div id="create-alias-dialog" waves-dialog global="true" ok-button-caption="CREATE" on-dialog-ok="create.confirmCreateAlias(create.form)">
+          <div class="existing-aliases">
+            <h2 class="sectionHeader">YOUR ALIASES</h2>
+            <div ng-if="create.aliasList !== null">
+              <span ng-repeat="alias in create.aliasList"><span class="alias">{{alias}}</span>&nbsp;</span>
+              <span ng-if="create.aliasList.length === 0">You don't have any aliases yet</span>
+            </div>
+            <div ng-if="create.aliasList === null">
+              <span>Loading...</span>
+            </div>
+          </div>
           <h2 class="sectionHeader">CREATE NEW ALIAS</h2>
           <p>Here you can assign a symbolic name to your address</p>
           <form name="create.form" novalidate ng-validate="create.validationOptions">
@@ -584,6 +602,12 @@
           <div class="noDisp" ng-controller="walletDepositController as deposit" data-currency="ETH">
             <div id="deposit-eth-dialog" waves-dialog ok-button-caption="CLOSE" cancel-button-visible="false">
               <h2 class="sectionHeader">DEPOSIT: ETH</h2>
+              <div class="plate-warning">
+                <p><b>Do not deposit ETH from smart contracts!</b></p>
+                <p>Check if your wallet or exchange uses smart-contracts to withdraw ETH.<br/>
+                   We do not accept such transactions and can’t refund them.<br/>
+                   You will lose that money.</p>
+              </div>
               <p class="dialog-text">To deposit ETH to your Waves account, please send ETH to the address below.<br/>
                 The minimum amount of deposit is <span class="fontBold">{{deposit.eth.minimumAmount}} ETH</span>.</p>
               <p class="dialog-text">Please do not deposit ERC20 tokens! Only Ethereum is allowed.</p>
@@ -599,6 +623,48 @@
               <p class="dialog-text">Please note that the gateway doesn't apply any fees for this operation.</p>
               <div class="textCenter">
                 <waves-qr-code class="center" size="180" value="deposit.eth.ethereumAddress"></waves-qr-code>
+              </div>
+            </div>
+          </div>
+
+          <div class="noDisp" ng-controller="walletDepositController as deposit" data-currency="LTC">
+            <div id="deposit-ltc-dialog" waves-dialog ok-button-caption="CLOSE" cancel-button-visible="false">
+              <h2 class="sectionHeader">DEPOSIT: LTC</h2>
+              <p class="dialog-text">To deposit LTC to your Waves account, please send LTC to the address below.<br/>
+                The minimum amount of deposit is <span class="fontBold">{{deposit.ltc.minimumAmount}} LTC</span>.</p>
+              <table class="wavesTable bitcoin-requisites">
+                <tbody>
+                <tr>
+                  <td><b>{{deposit.ltc.litecoinAddress}}</b></td>
+                </tr>
+                </tbody>
+              </table>
+              <p class="dialog-text">Enter this address into your Litecoin client or wallet. Once the transaction is confirmed, <br/>
+                the gateway will process the transfer of LTC to a token in your Waves account.</p>
+              <p class="dialog-text">Please note that the gateway doesn't apply any fees for this operation.</p>
+              <div class="textCenter">
+                <waves-qr-code class="center" size="180" value="deposit.ltc.litecoinAddress"></waves-qr-code>
+              </div>
+            </div>
+          </div>
+
+          <div class="noDisp" ng-controller="walletDepositController as deposit" data-currency="ZEC">
+            <div id="deposit-zec-dialog" waves-dialog ok-button-caption="CLOSE" cancel-button-visible="false">
+              <h2 class="sectionHeader">DEPOSIT: ZEC</h2>
+              <p class="dialog-text">To deposit Zcash to your Waves account, please send Zcash to the address below.<br/>
+                The minimum amount of deposit is <span class="fontBold">{{deposit.zec.minimumAmount}} ZEC</span>.</p>
+              <table class="wavesTable bitcoin-requisites">
+                <tbody>
+                <tr>
+                  <td><b>{{deposit.zec.zcashAddress}}</b></td>
+                </tr>
+                </tbody>
+              </table>
+              <p class="dialog-text">Enter this address into your Zcash client or wallet. Once the transaction is confirmed, <br/>
+                the gateway will process the transfer of Zcash to a token in your Waves account.</p>
+              <p class="dialog-text">Please note that the gateway doesn't apply any fees for this operation.</p>
+              <div class="textCenter">
+                <waves-qr-code class="center" size="180" value="deposit.zec.zcashAddress"></waves-qr-code>
               </div>
             </div>
           </div>
@@ -741,7 +807,7 @@
               </tr>
               <tr ng-show="!assetList.noData" ng-repeat="tx in assetList.assets | asset track by tx.id">
                 <td>
-                  <span ng-class="{verified: tx.balance.currency.verified}">{{tx.name}}</span>
+                  <span>{{tx.name}}</span>
                 </td>
                 <td>{{tx.formatted.sender}}</td>
                 <td>{{tx.reissuable}}</td>

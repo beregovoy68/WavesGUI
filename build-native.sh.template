@@ -16,4 +16,3 @@ export WAVES_CONFIGURATION=testnet
 # building executables for mainnet
 #export WAVES_CONFIGURATION=mainnet
 #./node_modules/.bin/build -mwl --config.directories.output=distr/native/$WAVES_CONFIGURATION --config.directories.app=distr/desktop-$WAVES_CONFIGURATION
-
